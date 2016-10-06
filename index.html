@@ -62,6 +62,7 @@ function base64UrlToUint8Array(base64UrlData) {
     window.testSubscription = JSON.stringify(subscription);
   })
   .catch(function(err) {
+	console.log(err);
     window.subscribeSuccess = false;
     window.subscribeError = err;
   });
