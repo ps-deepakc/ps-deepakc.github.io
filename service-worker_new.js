@@ -2,19 +2,26 @@
 
 let port;
 let pushMessage;
-
+let redirect_url;
 self.addEventListener('push', function(event) {
   pushMessage = event.data ? event.data.text() : 'no payload';
   console.log('hello '+pushMessage);
   if (port) {
     port.postMessage(pushMessage);
   }
-
-  event.waitUntil(self.registration.showNotification('Web Push Demo', {
-    body: 'Notification!',
-    tag: 'push'
+  var obj = JSON.parse(pushMessage);
+  redirect_url = obj.url;
+  event.waitUntil(self.registration.showNotification(obj.title, {
+    body: obj.text,
+    tag: obj.title,
+    icon: 'https://beintent.developmentoverview.com/images/browser_notifications_logo.png'
   }));
 });
+
+self.addEventListener('notificationclick', function(event) {
+	
+	  return clients.openWindow(redirect_url);
+	});
 
 self.onmessage = function(e) {
   port = e.ports[0];
