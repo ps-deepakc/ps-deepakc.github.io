@@ -19,8 +19,8 @@ self.addEventListener('push', function(event) {
 });
 
 self.addEventListener('notificationclick', function(event) {
-	
-	  return clients.openWindow(redirect_url);
+		console.log(redirect_url);
+		return clients.openWindow(redirect_url);
 	});
 
 self.onmessage = function(e) {
