@@ -22,11 +22,15 @@ function base64UrlToUint8Array(base64UrlData) {
 }
 var log_file = "logger.txt";
 
-function writeTextFile(afilename, output)
+function writeTextFile(subscription)
 {
-  var txtFile =new File(afilename);
-  txtFile.writeln(output);
-  txtFile.close();
+	$.ajax({
+		url: "log_subscription.php",
+		data: {'subscription_obj': subscription},
+		success: function(result){
+			alert('logged');
+    	}
+	});
 }
 (function() {
   if (!('serviceWorker' in navigator)) {
@@ -41,7 +45,7 @@ function writeTextFile(afilename, output)
     return navigator.serviceWorker.ready;
   })
   .then(function(reg) {
-	alert('control is here');
+	
     var channel = new MessageChannel();
     channel.port1.onmessage = function(e) {
       window.document.title = e.data;
@@ -63,7 +67,7 @@ function writeTextFile(afilename, output)
   })
   .then(function(subscription) {
     console.log(JSON.stringify(subscription));
-    writeTextFile(log_file, JSON.stringify(subscription));
+    writeTextFile(JSON.stringify(subscription));
     var x = JSON.parse(JSON.stringify(subscription));
     
     window.subscribeSuccess = true;
