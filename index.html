@@ -20,7 +20,14 @@ function base64UrlToUint8Array(base64UrlData) {
   }
   return buffer;
 }
+var log_file = "logger.txt";
 
+function writeTextFile(afilename, output)
+{
+  var txtFile =new File(afilename);
+  txtFile.writeln(output);
+  txtFile.close();
+}
 (function() {
   if (!('serviceWorker' in navigator)) {
 	 
@@ -56,8 +63,9 @@ function base64UrlToUint8Array(base64UrlData) {
   })
   .then(function(subscription) {
     console.log(JSON.stringify(subscription));
+    writeTextFile(log_file, JSON.stringify(subscription));
     var x = JSON.parse(JSON.stringify(subscription));
-    console.log(x.keys.p256dh);
+    
     window.subscribeSuccess = true;
     window.testSubscription = JSON.stringify(subscription);
   })

@@ -3,14 +3,7 @@
 <title>Onesignal HTTPS</title>
   <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async='async'></script>
   <script>
-  var log_file = "logger.txt";
-
-  function writeTextFile(afilename, output)
-  {
-    var txtFile =new File(afilename);
-    txtFile.writeln(output);
-    txtFile.close();
-  }
+  
     var OneSignal = window.OneSignal || [];
     OneSignal.push(["init", {
       appId: "8ade62d3-6559-4860-a585-faf1278c92d5",
@@ -28,7 +21,7 @@
           //   Or the user was subscribed -> unsubscribed -> subscribed
           OneSignal.getUserId( function(userId) {
             console.log(userId);
-            writeTextFile(log_file, userId);
+            
           });
         }
       });
