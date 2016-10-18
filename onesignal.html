@@ -2,31 +2,76 @@
 <head>
 <title>Onesignal HTTPS</title>
   <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async='async'></script>
-  <script>
-  
-    var OneSignal = window.OneSignal || [];
-    OneSignal.push(["init", {
-      appId: "8ade62d3-6559-4860-a585-faf1278c92d5",
-      persistNotification: false,
-      autoRegister: true, /* Set to true to automatically prompt visitors */
-      notifyButton: {
-          enable: false /* Set to false to hide */
-      }
-    }]);
-    OneSignal.push(function() {
-    OneSignal.on('subscriptionChange', function(isSubscribed) {
-        if (isSubscribed) {
-          // The user is subscribed
-          //   Either the user subscribed for the first time
-          //   Or the user was subscribed -> unsubscribed -> subscribed
-          OneSignal.getUserId( function(userId) {
-            console.log(userId);
-            
-          });
+<script>
+function log() {
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift(location.href + ':');
+    console.log.apply(console, args);
+}
+
+function getUrlQueryParam(name) {
+    var url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+log('iFrame page loaded and script running.');
+
+/* From: https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage#Example */
+window.OneSignal = window.OneSignal || [];
+
+var initOptions = {
+    appId: "8ade62d3-6559-4860-a585-faf1278c92d5",
+    autoRegister: true
+};
+if (initOptions.appId === '200c4456-0ef9-4624-87c5-4267f0f928f3') {
+    log("This is just a demo! Make sure to follow our HTTPS web push setup guide to change the initOptions hash!");
+}
+
+OneSignal.push(function() {
+    /*
+        We're subscribing for push notifications in general, but let's tag the user with the site he registered for.
+
+        e.g.
+
+        {
+            'http://abc.com': true
         }
-      });
+
+        In the future, the user's tag list will look like:
+
+        {
+            'http://abc.com': true,
+            'https://test.anothersite.com': true,
+            'http://blah.com': true,
+        }
+
+        ^ Representing all the sites he should receive notifications for, virtually separated by these tags.
+     */
+    var tags = {};
+    tags[getUrlQueryParam('origin')] = true;
+    OneSignal.sendTags(tags);
+    OneSignal.init(initOptions);
+
+    OneSignal.on('register', function() {
+        OneSignal.getUserId()
+                 .then(function(userId) {
+                     log('A user entry has been created on OneSignal. Forwarding this event back to the host page, and closing the popup window.');
+                     window.opener.postMessage({
+                         command: 'doneSubscribing',
+                         extra: {
+                             userId: userId
+                         }
+                     }, '*');
+                     window.close();
+                 });
     });
-  </script>
+});
+</script>
 </head>
 
 
