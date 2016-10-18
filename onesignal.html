@@ -1,22 +1,16 @@
 <html>
+
 <head>
-<title>Onesignal HTTPS</title>
-  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js"></script>
+<script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async="async"></script>
+<!--<script src="https://127.0.0.1:3001/sdks/OneSignalSDK.js" async></script>-->
+</head>
+
+<body>
 <script>
 function log() {
     var args = Array.prototype.slice.call(arguments);
     args.unshift(location.href + ':');
     console.log.apply(console, args);
-}
-
-function getUrlQueryParam(name) {
-    var url = window.location.href;
-    name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-            results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
 log('iFrame page loaded and script running.');
@@ -26,7 +20,7 @@ window.OneSignal = window.OneSignal || [];
 
 var initOptions = {
     appId: "8ade62d3-6559-4860-a585-faf1278c92d5",
-    autoRegister: true,
+    autoRegister: false,
     subdomainName: 'https://ps-deepakc-github.onesignal.com'
 };
 if (initOptions.appId === '200c4456-0ef9-4624-87c5-4267f0f928f3') {
@@ -34,51 +28,71 @@ if (initOptions.appId === '200c4456-0ef9-4624-87c5-4267f0f928f3') {
 }
 
 OneSignal.push(function() {
-    /*
-        We're subscribing for push notifications in general, but let's tag the user with the site he registered for.
-
-        e.g.
-
-        {
-            'http://abc.com': true
-        }
-
-        In the future, the user's tag list will look like:
-
-        {
-            'http://abc.com': true,
-            'https://test.anothersite.com': true,
-            'http://blah.com': true,
-        }
-
-        ^ Representing all the sites he should receive notifications for, virtually separated by these tags.
-     */
-    var tags = {};
-    tags[getUrlQueryParam('origin')] = true;
-    OneSignal.sendTags(tags);
     OneSignal.init(initOptions);
+});
 
-    OneSignal.on('register', function() {
-        OneSignal.getUserId()
-                 .then(function(userId) {
-                     log('A user entry has been created on OneSignal. Forwarding this event back to the host page, and closing the popup window.');
-                     window.opener.postMessage({
-                         command: 'doneSubscribing',
-                         extra: {
-                             userId: userId
-                         }
-                     }, '*');
-                     window.close();
-                 });
+// Called sometime after postMessage is called
+function receiveMessage(event) {
+    log('Received a postMessage message:', event);
+    // Do we trust the sender of this message?
+
+    // TODO: Be sure to implement this in the future!
+//        if (event.origin !== "a.com" ||
+//                event.origin !== "b.com" ||
+//                event.origin !== "c.com")
+//            return;
+
+    // event.source is window.opener
+    // event.data is {command: 'query', extra: {}}
+
+    // Assuming you've verified the origin of the received message (which
+    // you must do in any case), a convenient idiom for replying to a
+    // message is to call postMessage on event.source and provide
+    // event.origin as the targetOrigin.
+    if (event.data.command === 'query') {
+        OneSignal.push(function () {
+            Promise.all([
+                OneSignal.isPushNotificationsEnabled(),
+                OneSignal.getTags(),
+                OneSignal.getUserId()
+            ]).then(function (results) {
+                log('Got subscription state, tags, and user ID from iFrame:', results);
+                event.source.postMessage({
+                            command: 'reply',
+                            extra: results
+                        },
+                        event.origin);
+            })
+            .catch(function (e) {
+                log('Error in retrieving iframe state:', e);
+            });
+        });
+    } else if (event.data.command === 'subscribe') {
+        log("Setting a tag on this user record to mark that he's subscribing on:" , event.data.extra.origin);
+        OneSignal.push(function() {
+            var tags = {};
+            tags[event.data.extra.origin] = true;
+            /*
+             The user is already subscribed to push notifications on https://push.yoursite.com.
+             All sites opening a popup to https://push.yoursite.com share a subscription.
+             To simulate separate subscriptions for sites, we'll just tag the subscriber as
+             having subscribed on multiple sites using our tagging system (key-value attribute pairs)
+             and when we send notifications we can target users with only a specific site's tag.
+
+             The tag key is the site's origin. e.g. http://abc.com.
+             */
+            OneSignal.sendTags(tags);
+        });
+    }
+}
+
+window.addEventListener("message", receiveMessage, false);
+OneSignal.push(function() {
+    OneSignal.on('initialize', function() {
+        window.addEventListener("message", receiveMessage, false);
     });
 });
 </script>
-</head>
-
-
-
-<body>
-<h2>Onesignal Test</h2>
 </body>
 
 </html>
