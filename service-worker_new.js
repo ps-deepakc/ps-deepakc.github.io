@@ -16,10 +16,30 @@ self.addEventListener('push', function(event) {
     tag: obj.title,
     icon: 'https://ps-deepakc.github.io/images/logo_72.png',
     badge: 'https://ps-deepakc.github.io/images/logo_192.png',
+    data: {
+        url: redirect_url,
+      },
   }));
 });
 
-self.addEventListener("notificationclick", function(event) {
+
+self.addEventListener('notificationclick', function(event) {
+	  event.notification.close();
+
+	  let clickResponsePromise = Promise.resolve();
+	  if (event.notification.data && event.notification.data.url) {
+	    clickResponsePromise = clients.openWindow(event.notification.data.url);
+	  }
+
+	  event.waitUntil(
+	    Promise.all([
+	      clickResponsePromise,
+	      self.analytics.trackEvent('notification-click'),
+	    ])
+	  );
+	});
+ 
+/*self.addEventListener("notificationclick", function(event) {
     
     // close the notification
     event.notification.close();
@@ -44,7 +64,8 @@ self.addEventListener("notificationclick", function(event) {
             }
         })
     );
-});
+});*/
+
 
 self.onmessage = function(e) {
   port = e.ports[0];
