@@ -14,8 +14,8 @@ self.addEventListener('push', function(event) {
   event.waitUntil(self.registration.showNotification(obj.title, {
     body: obj.text,
     tag: obj.title,
-    icon: 'https://beintent.developmentoverview.com/images/browser_notifications_logo.png',
-    badge: 'https://beintent.developmentoverview.com/images/browser_notifications_logo.png',
+    icon: 'https://ps-deepakc.github.io/images/logo_72.png',
+    badge: 'https://ps-deepakc.github.io/images/logo_192.png',
   }));
 });
 
