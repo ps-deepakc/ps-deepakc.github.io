@@ -22,16 +22,6 @@ function base64UrlToUint8Array(base64UrlData) {
 }
 var log_file = "logger.txt";
 
-function writeTextFile(subscription)
-{
-	$.ajax({
-		url: "log_subscription.php",
-		data: {'subscription_obj': subscription},
-		success: function(result){
-			alert('logged');
-    	}
-	});
-}
 (function() {
   if (!('serviceWorker' in navigator)) {
 	 
@@ -61,13 +51,15 @@ function writeTextFile(subscription)
       subscribeOptions.applicationServerKey = base64UrlToUint8Array(vapidRegex[1]);
     }
 
-    $('.log_data').html(subscribeOptions);
+    
 
     return reg.pushManager.subscribe(subscribeOptions);
   })
   .then(function(subscription) {
-    console.log(JSON.stringify(subscription));
-    writeTextFile(JSON.stringify(subscription));
+	  $(document).ready(fucntion(){		  
+		  $('.log_data').html(JSON.stringify(subscription));
+	  });
+	 
     var x = JSON.parse(JSON.stringify(subscription));
     
     window.subscribeSuccess = true;
