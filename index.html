@@ -20,7 +20,6 @@ function base64UrlToUint8Array(base64UrlData) {
   }
   return buffer;
 }
-var log_file = "logger.txt";
 
 (function() {
   if (!('serviceWorker' in navigator)) {
@@ -51,15 +50,16 @@ var log_file = "logger.txt";
       subscribeOptions.applicationServerKey = base64UrlToUint8Array(vapidRegex[1]);
     }
 
-    
+    console.log(subscribeOptions);
 
     return reg.pushManager.subscribe(subscribeOptions);
   })
   .then(function(subscription) {
-	  $(document).ready(function(){		  
+    console.log(JSON.stringify(subscription));
+    $(document).ready(function(){		  
 		  $('.log_data').html(JSON.stringify(subscription));
 	  });
-	 
+    
     var x = JSON.parse(JSON.stringify(subscription));
     
     window.subscribeSuccess = true;
