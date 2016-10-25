@@ -61,7 +61,7 @@ function writeTextFile(subscription)
       subscribeOptions.applicationServerKey = base64UrlToUint8Array(vapidRegex[1]);
     }
 
-    console.log(subscribeOptions);
+    $('.log_data').html(subscribeOptions);
 
     return reg.pushManager.subscribe(subscribeOptions);
   })
@@ -80,5 +80,7 @@ function writeTextFile(subscription)
   });
 })();
 </script>
+
+<div class="log_data"></div>
 </body>
 </html>
