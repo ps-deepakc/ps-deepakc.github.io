@@ -56,7 +56,7 @@ var log_file = "logger.txt";
     return reg.pushManager.subscribe(subscribeOptions);
   })
   .then(function(subscription) {
-	  $(document).ready(fucntion(){		  
+	  $(document).ready(function(){		  
 		  $('.log_data').html(JSON.stringify(subscription));
 	  });
 	 
